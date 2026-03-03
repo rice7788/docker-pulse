@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          path: customized
+          path: $GITHUB_WORKSPACE/customized
 
       - uses: actions/checkout@v6
         with:
