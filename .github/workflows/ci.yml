@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          path: customized
+          path: /tmp/customized
 
       - uses: actions/checkout@v6
         with:
@@ -24,7 +24,7 @@ jobs:
           ref: ${{ github.event.inputs.tag }}
 
       - name: Replace Dockerfile
-        run: cp -f $GITHUB_WORKSPACE/customized/Dockerfile $GITHUB_WORKSPACE/Dockerfile
+        run: cp -f /tmp/customized/Dockerfile Dockerfile
 
       - name: Extract tags
         id: vars
