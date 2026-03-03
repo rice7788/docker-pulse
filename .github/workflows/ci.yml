@@ -19,6 +19,12 @@ jobs:
           repository: rcourtman/Pulse
           ref: ${{ github.event.inputs.tag }}
 
+      - uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          include: Dockerfile
+          find: "BUILD_AGENT=1"
+          replace: "BUILD_AGENT=0"
+
       - name: Extract tags
         id: vars
         run: |
