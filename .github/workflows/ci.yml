@@ -20,8 +20,12 @@ jobs:
           repository: rcourtman/Pulse
           ref: ${{ github.event.inputs.tag }}
 
-      - name: Replace Dockerfile
-        run: curl https://raw.githubusercontent.com/rice7788/docker-pulse/refs/heads/main/Dockerfile > Dockerfile
+      - name: Replace files
+        run: |
+          git clone https://github.com/${{ github.actor }}/docker-pulse /tmp/pulse
+          cp -f /tmp/pulse/Dockerfile Dockerfile
+          cp -f /tmp/pulse/internal/agentbinaries/host_agent.go internal/agentbinaries/host_agent.go
+          
 
       - name: Extract tags
         id: vars
