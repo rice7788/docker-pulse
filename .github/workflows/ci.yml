@@ -17,15 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          path: /tmp/customized
-
-      - uses: actions/checkout@v6
-        with:
           repository: rcourtman/Pulse
           ref: ${{ github.event.inputs.tag }}
 
       - name: Replace Dockerfile
-        run: cp -f /tmp/customized/Dockerfile Dockerfile
+        run: curl https://raw.githubusercontent.com/rice7788/docker-pulse/refs/heads/main/Dockerfile > Dockerfile
 
       - name: Extract tags
         id: vars
