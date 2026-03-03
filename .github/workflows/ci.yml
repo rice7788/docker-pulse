@@ -16,14 +16,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          path: customized
+
+      - uses: actions/checkout@v6
+        with:
           repository: rcourtman/Pulse
           ref: ${{ github.event.inputs.tag }}
 
-      - uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          include: Dockerfile
-          find: "BUILD_AGENT=1"
-          replace: "BUILD_AGENT=0"
+      - name: Replace Dockerfile
+        run: cp -f ./customized/Dockerfile ./Dockerfile
 
       - name: Extract tags
         id: vars
@@ -54,6 +55,4 @@ jobs:
           push: true
           provenance: false
           platforms: linux/amd64
-          build-args : |
-            BUILD_AGENT=0
           tags: ${{ steps.meta.outputs.tags }}
