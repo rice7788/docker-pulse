@@ -6,6 +6,7 @@ on:
         description: 'Git tags'
         required: true
         type: string
+        default: 'v5.1.17'
 
 jobs:
   build:
