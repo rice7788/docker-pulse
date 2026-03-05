@@ -125,8 +125,8 @@ ENV PULSE_DATA_DIR=/data
 ENV PULSE_DOCKER=true
 
 RUN adduser -D -u 1000 -g 1000 pulse && \
-    mkdir -p /etc/pulse /data && \
-    chown -R pulse:pulse /app /etc/pulse /data && \
+    mkdir -p /etc/pulse /data /opt/pulse && \
+    chown -R pulse:pulse /app /etc/pulse /data /opt/pulse && \
     chmod +x /app/pulse /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh", "/app/pulse"]
