@@ -103,30 +103,22 @@ ENTRYPOINT ["/usr/local/bin/pulse-docker-agent"]
 
 # Final stage (Pulse server runtime)
 FROM alpine:3.20 AS runtime
-
-# Use TARGETARCH to select the correct binary for the build platform
 ARG TARGETARCH
 
-RUN apk --no-cache add ca-certificates tzdata su-exec openssh-client
-
 WORKDIR /app
-
-COPY --from=backend-builder /app/pulse-linux-${TARGETARCH:-amd64} ./pulse
-
+#COPY --from=backend-builder /app/pulse-linux-${TARGETARCH:-amd64} /app/pulse
+COPY --from=backend-builder /app/pulse-linux-amd64 /app/pulse-linux-amd64
 COPY --from=backend-builder /app/VERSION .
-
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-COPY --from=backend-builder /app/pulse-linux-amd64 /app/pulse-linux-amd64
-
 EXPOSE 7655
-
 ENV PULSE_DATA_DIR=/data
 ENV PULSE_DOCKER=true
 
-RUN adduser -D -u 1000 -g 1000 pulse && \
-    mkdir -p /etc/pulse /data /opt/pulse && \
-    chown -R pulse:pulse /app /etc/pulse /data /opt/pulse && \
+RUN apk add --no-cache ca-certificates tzdata su-exec openssh-client && \
+    adduser -D -u 1000 -g 1000 pulse && \
+    mkdir -p /data /etc/pulse /opt/pulse && \
+    chown -R pulse:pulse /app /data /etc/pulse /opt/pulse && \
     chmod +x /app/pulse /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh", "/app/pulse"]
