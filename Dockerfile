@@ -60,7 +60,7 @@ ENV PULSE_DATA_DIR=/data
 ENV PULSE_DOCKER=true
 ENV PULSE_LICENSE_DEV_MODE=true
 
-RUN apk add --no-cache ca-certificates tzdata su-exec openssh-client && \
+RUN apk add --no-cache ca-certificates tzdata su-exec && \
     adduser -H -D -u 1000 -g 1000 pulse && \
     mkdir -p /data /etc/pulse /opt/pulse && \
     chown -R pulse:pulse /app /data /etc/pulse /opt/pulse && \
