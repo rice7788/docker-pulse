@@ -111,66 +111,22 @@ RUN apk --no-cache add ca-certificates tzdata su-exec openssh-client
 
 WORKDIR /app
 
-# Copy the correct pulse binary for target architecture directly
-# Use separate COPY commands with TARGETARCH to avoid copying both binaries
-# (copying to /tmp then deleting wastes space due to Docker layer immutability)
 COPY --from=backend-builder /app/pulse-linux-${TARGETARCH:-amd64} ./pulse
-RUN chmod +x ./pulse
 
-
-
-# Copy VERSION file
 COPY --from=backend-builder /app/VERSION .
 
-# Copy entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
 
-# Provide installer scripts for HTTP download endpoints
-RUN mkdir -p /opt/pulse/scripts
-COPY scripts/install-docker-agent.sh /opt/pulse/scripts/install-docker-agent.sh
-COPY scripts/install-container-agent.sh /opt/pulse/scripts/install-container-agent.sh
-COPY scripts/install-host-agent.ps1 /opt/pulse/scripts/install-host-agent.ps1
-COPY scripts/uninstall-host-agent.sh /opt/pulse/scripts/uninstall-host-agent.sh
-COPY scripts/uninstall-host-agent.ps1 /opt/pulse/scripts/uninstall-host-agent.ps1
-COPY scripts/install-docker.sh /opt/pulse/scripts/install-docker.sh
-COPY scripts/install.sh /opt/pulse/scripts/install.sh
-COPY scripts/install.ps1 /opt/pulse/scripts/install.ps1
-RUN chmod 755 /opt/pulse/scripts/*.sh /opt/pulse/scripts/*.ps1
+COPY --from=backend-builder /app/pulse-linux-amd64 /app/pulse-linux-amd64
 
-# Copy all binaries for download endpoint
-RUN mkdir -p /opt/pulse/bin
-
-# Main pulse server binary (for validation) - copy both architectures
-COPY --from=backend-builder /app/pulse-linux-amd64 /opt/pulse/bin/pulse-linux-amd64
-RUN ln -s pulse-linux-amd64 /opt/pulse/bin/pulse
-
-
-
-# Create config directory
-RUN mkdir -p /etc/pulse /data
-
-# Expose port
 EXPOSE 7655
 
-# Set environment variables
-# Only PULSE_DATA_DIR is used - all node config is done via web UI
 ENV PULSE_DATA_DIR=/data
 ENV PULSE_DOCKER=true
 
-# Create default user (will be adjusted by entrypoint if PUID/PGID are set)
 RUN adduser -D -u 1000 -g 1000 pulse && \
-    chown -R pulse:pulse /app /etc/pulse /data /opt/pulse
+    mkdir -p /etc/pulse /data && \
+    chown -R pulse:pulse /app /etc/pulse /data && \
+    chmod +x /app/pulse /docker-entrypoint.sh
 
-# Health check script (handles both HTTP and HTTPS)
-COPY docker-healthcheck.sh /docker-healthcheck.sh
-RUN chmod +x /docker-healthcheck.sh
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD /docker-healthcheck.sh
-
-# Use entrypoint script to handle UID/GID
-ENTRYPOINT ["/docker-entrypoint.sh"]
-
-# Run the binary
-CMD ["./pulse"]
+ENTRYPOINT ["/docker-entrypoint.sh", "/app/pulse"]
