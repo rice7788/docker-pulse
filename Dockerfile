@@ -106,8 +106,8 @@ FROM alpine:3.20 AS runtime
 ARG TARGETARCH
 
 WORKDIR /app
-#COPY --from=backend-builder /app/pulse-linux-${TARGETARCH:-amd64} /app/pulse
-COPY --from=backend-builder /app/pulse-linux-amd64 /app/pulse-linux-amd64
+COPY --from=backend-builder /app/pulse-linux-${TARGETARCH:-amd64} /app/pulse
+#COPY --from=backend-builder /app/pulse-linux-amd64 /app/pulse-linux-amd64
 COPY --from=backend-builder /app/VERSION .
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
