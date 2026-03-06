@@ -51,7 +51,7 @@ FROM alpine:3.20 AS prepare
 COPY --from=backend-builder /app/pulse-linux-amd64 /rootfs/app/pulse
 COPY --from=backend-builder /app/VERSION /rootfs/app/VERSION
 COPY docker-entrypoint.sh /rootfs/docker-entrypoint.sh
-RUN chmod +x /app/pulse /docker-entrypoint.sh
+RUN chmod +x /rootfs/app/pulse /rootfs/docker-entrypoint.sh
 RUN mkdir -p /rootfs/data /rootfs/etc/pulse /rootfs/opt/pulse
 
 
