@@ -60,10 +60,10 @@ ENV PULSE_DATA_DIR=/data
 ENV PULSE_DOCKER=true
 ENV PULSE_LICENSE_DEV_MODE=true
 
+COPY --from=prepare /rootfs /
 RUN apk add --no-cache ca-certificates tzdata su-exec && \
     adduser -H -D -u 1000 -g 1000 pulse && \
     chown -R pulse:pulse /app /data /etc/pulse /opt/pulse
-COPY --from=prepare /rootfs /
 
 EXPOSE 7655
 #WORKDIR /app
