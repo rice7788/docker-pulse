@@ -47,7 +47,7 @@ RUN --mount=type=cache,id=pulse-go-mod,target=/go/pkg/mod \
       -o pulse-linux-amd64 ./cmd/pulse
 
 
-FROM alpine 3.20 AS prepare
+FROM alpine:3.20 AS prepare
 COPY --from=backend-builder /app/pulse-linux-amd64 /rootfs/app/pulse
 COPY --from=backend-builder /app/VERSION /rootfs/app/VERSION
 COPY docker-entrypoint.sh /rootfs/docker-entrypoint.sh
