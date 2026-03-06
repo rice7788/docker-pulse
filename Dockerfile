@@ -47,23 +47,25 @@ RUN --mount=type=cache,id=pulse-go-mod,target=/go/pkg/mod \
       -o pulse-linux-amd64 ./cmd/pulse
 
 
+FROM alpine 3.20 AS prepare
+COPY --from=backend-builder /app/pulse-linux-amd64 /rootfs/app/pulse
+COPY --from=backend-builder /app/VERSION /rootfs/app/VERSION
+COPY docker-entrypoint.sh /rootfs/docker-entrypoint.sh
+RUN chmod +x /app/pulse /docker-entrypoint.sh
+RUN mkdir -p /rootfs/data /rootfs/etc/pulse /rootfs/opt/pulse
+
+
 FROM alpine:3.20 AS runtime
-ARG TARGETARCH
-
-WORKDIR /app
-COPY --from=backend-builder /app/pulse-linux-amd64 /app/pulse
-#COPY --from=backend-builder /app/VERSION .
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-
-EXPOSE 7655
 ENV PULSE_DATA_DIR=/data
 ENV PULSE_DOCKER=true
 ENV PULSE_LICENSE_DEV_MODE=true
 
 RUN apk add --no-cache ca-certificates tzdata su-exec && \
     adduser -H -D -u 1000 -g 1000 pulse && \
-    mkdir -p /data /etc/pulse /opt/pulse && \
-    chown -R pulse:pulse /app /data /etc/pulse /opt/pulse && \
-    chmod +x /app/pulse /docker-entrypoint.sh
+    chown -R pulse:pulse /app /data /etc/pulse /opt/pulse
+COPY --from=prepare /rootfs /
 
+EXPOSE 7655
+#WORKDIR /app
+USER 1000:1000
 ENTRYPOINT ["/docker-entrypoint.sh", "/app/pulse"]
