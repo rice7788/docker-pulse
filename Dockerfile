@@ -20,7 +20,7 @@ ARG PULSE_LICENSE_PUBLIC_KEY
 ARG VERSION
 WORKDIR /app
 
-RUN apk add --no-cache git
+RUN apk add git build-base
 COPY go.mod go.sum ./
 RUN --mount=type=cache,id=pulse-go-mod,target=/go/pkg/mod \
     --mount=type=cache,id=pulse-go-build,target=/root/.cache/go-build \
