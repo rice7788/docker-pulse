@@ -37,17 +37,13 @@ RUN --mount=type=cache,id=pulse-go-mod,target=/go/pkg/mod \
     VERSION="${VERSION:-v$(cat VERSION | tr -d '\n')}" && \
     BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") && \
     GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown") && \
-    LICENSE_LDFLAGS="" && \
-    if [ -n "${PULSE_LICENSE_PUBLIC_KEY}" ]; then \
-      LICENSE_LDFLAGS="-X github.com/rcourtman/pulse-go-rewrite/internal/license.EmbeddedPublicKey=${PULSE_LICENSE_PUBLIC_KEY}"; \
-    fi && \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
       -ldflags="-s -w -X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME} -X main.GitCommit=${GIT_COMMIT} -X github.com/rcourtman/pulse-go-rewrite/internal/dockeragent.Version=${VERSION} ${LICENSE_LDFLAGS}" \
       -trimpath \
       -o pulse-linux-amd64 ./cmd/pulse
 
 
-FROM alpine:3.20 AS prepare
+FROM alpine:3.23 AS prepare
 COPY --from=backend-builder /app/pulse-linux-amd64 /rootfs/app/pulse
 COPY --from=backend-builder /app/VERSION /rootfs/app/VERSION
 COPY docker-entrypoint.sh /rootfs/docker-entrypoint.sh
@@ -55,7 +51,7 @@ RUN chmod +x /rootfs/app/pulse /rootfs/docker-entrypoint.sh
 RUN mkdir -p /rootfs/data /rootfs/etc/pulse /rootfs/opt/pulse
 
 
-FROM alpine:3.20 AS runtime
+FROM alpine:3.23 AS runtime
 ENV PULSE_DATA_DIR=/data
 ENV PULSE_DOCKER=true
 ENV PULSE_LICENSE_DEV_MODE=true
@@ -66,6 +62,5 @@ RUN apk add --no-cache ca-certificates tzdata su-exec && \
     chown -R pulse:pulse /app /data /etc/pulse /opt/pulse
 
 EXPOSE 7655
-#WORKDIR /app
 USER 1000:1000
 ENTRYPOINT ["/docker-entrypoint.sh", "/app/pulse"]
